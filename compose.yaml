@@ -1,14 +1,13 @@
 services:
   php:
     container_name: php-apache
-    image: php:8.2-apache
+    build: ./docker/php
     ports:
       - "8080:80"
     volumes:
-      - .:/var/www/html
+      - ./php:/var/www/html
     environment:
       MYSQL_HOST: "mysql"
-    command: /bin/bash -c "apt-get update && apt-get install -y libpng-dev && docker-php-ext-install mysqli && apache2-foreground"
   mysql:
     container_name: sql
     image: mysql:8.0
