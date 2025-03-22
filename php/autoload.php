@@ -1,6 +1,6 @@
 <?php
 
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: localhost");
 
 
 spl_autoload_register(function ($className) {
@@ -8,3 +8,7 @@ spl_autoload_register(function ($className) {
     if (file_exists($file))
         require_once $file;
 });
+
+function get_mysqli(): mysqli {
+    return new mysqli("mysql", "root", "", "bytebox");
+}
