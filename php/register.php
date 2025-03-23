@@ -1,17 +1,14 @@
 <?php
 require_once 'autoload.php';
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-    echo "Bad request method";
-    exit();
-}
+use_request_method(RequestMethod::POST->value);
 
 if (empty($_POST['login']) || empty($_POST['password'])) {
-    echo "Bad request";
+    echo new Packet(ResponseCode::ERROR, "bad request");
     exit();
 }
 session_start();
 if (isset($_SESSION['TOKEN'])) {
-    echo "already logged in";
+    echo new Packet(ResponseCode::ERROR, "already logged in");
     exit();
 }
 
@@ -22,7 +19,7 @@ $password = $_POST['password'];
 
 $res = $db->query("SELECT user_id from user where login='$login'");
 if ($res->num_rows > 0) {
-    echo "login already occupied";
+    echo new Packet(ResponseCode::ERROR, "login is already used");
     exit();
 }
 
@@ -36,5 +33,5 @@ $stmt->execute();
 
 $_SESSION['TOKEN'] = $token;
 
-echo "Success";
+echo new Packet(ResponseCode::SUCCESS, "Success");
 exit();

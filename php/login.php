@@ -1,24 +1,15 @@
 <?php
 require_once 'autoload.php';
-if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-    echo "Invalid request method";
-    exit();
-}
+use_request_method(RequestMethod::POST->value);
+
 session_start();
-/*
- * what i'm expecting?
- * POST{
- * login: prob email example@example.com
- * password: raw password (will be hashed)
- * }
- */
+
 if (isset($_SESSION['TOKEN'])) {
-    echo "Already logged in";
+    echo new Packet(ResponseCode::ERROR, "Already logged in");
     exit();
 }
 if (empty($_POST['login']) || empty($_POST['password'])) {
-    echo "Invalid request";
-    print_r($_POST);
+    echo new Packet(ResponseCode::ERROR, "Invalid request");
     exit();
 }
 
@@ -29,16 +20,16 @@ $password = $_POST['password'];
 
 $res = $db->query("SELECT password, token FROM user WHERE login = '$login'");
 if ($res->num_rows == 0) {
-    echo "User not found";
+    echo new Packet(ResponseCode::ERROR, "User not found");
     exit();
 }
 $row = $res->fetch_assoc();
 if (!password_verify($password, $row['password'])) {
-    echo "Wrong password";
+    echo new Packet(ResponseCode::ERROR, "Wrong password");
     exit();
 }
 
 $_SESSION['TOKEN'] = $row['token'];
-echo "Successfully logged in";
+echo new Packet(ResponseCode::SUCCESS, "Successfully logged in");
 
 $db->close();
