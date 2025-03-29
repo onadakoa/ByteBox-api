@@ -33,6 +33,27 @@ CREATE TABLE `attachment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `cart_item`
+--
+
+DROP TABLE IF EXISTS `cart_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cart_item` (
+  `cart_item_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `product_id` int unsigned NOT NULL,
+  `quantity` smallint unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`cart_item_id`),
+  UNIQUE KEY `user_product_id` (`user_id`,`product_id`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `cart_item_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cart_item_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `image`
 --
 
@@ -63,6 +84,8 @@ CREATE TABLE `product` (
   `description` text NOT NULL,
   `attachment_id` int unsigned DEFAULT NULL,
   `author_id` int unsigned NOT NULL,
+  `price` decimal(10,2) unsigned NOT NULL,
+  `stock` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`product_id`),
   KEY `attachment_id` (`attachment_id`),
   KEY `author_id` (`author_id`),
@@ -112,7 +135,7 @@ CREATE TABLE `user` (
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `token` varchar(255) NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -124,4 +147,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-15 20:57:20
+-- Dump completed on 2025-03-29  9:32:20
