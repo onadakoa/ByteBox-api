@@ -50,7 +50,7 @@ class User
         return $u;
     }
     public static function user_by_credentials(mysqli $db, string $login, string $password) {
-        $query = "select *, UNIX_TIMESTAMP(creation_date) as creation_date from user where login = $login";
+        $query = "select *, UNIX_TIMESTAMP(creation_date) as creation_date from user where login = '$login'";
         $res = $db->query($query);
 
         if ($res->num_rows != 1) {
