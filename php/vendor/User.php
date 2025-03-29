@@ -50,13 +50,16 @@ class User
         return $u;
     }
     public static function user_by_credentials(mysqli $db, string $login, string $password) {
-        $query = "SELECT *, UNIX_TEMESTAMP(creation_date) as creation_date FROM user WHERE login = '$login' AND password = '$password' LIMIT 1";
+        $query = "select *, UNIX_TIMESTAMP(creation_date) as creation_date from user where login = $login";
         $res = $db->query($query);
 
-        if ($res->num_rows == 0) {
+        if ($res->num_rows != 1) {
             return false;
         }
         $row = $res->fetch_object();
+
+        if (!password_verify($password, $row->password))
+            return false;
 
         $u = new User();
         $u->setup($row);
