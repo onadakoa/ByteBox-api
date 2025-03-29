@@ -4,7 +4,7 @@ class User
 {
     public int $user_id;
     public string $login;
-    public string $password;
+    private string $password;
     public string $first_name;
     public string $last_name;
     public int $permission;
