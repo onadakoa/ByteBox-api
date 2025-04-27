@@ -1,7 +1,7 @@
 <?php
 class Attachment
 {
-    public int $id;
+    public int $attachment_id;
     public int $image_count;
     public int $author_id;
     public int $creation_date;
@@ -12,7 +12,7 @@ class Attachment
     private function __construct(mysqli $db, $id, $image_count, $author_id, $creation_date)
     {
         $this->db = $db;
-        $this->id = $id;
+        $this->attachment_id = $id;
         $this->image_count = $image_count;
         $this->author_id = $author_id;
         $this->creation_date = $creation_date;
