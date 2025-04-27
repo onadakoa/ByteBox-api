@@ -1,20 +1,29 @@
 <?php
 require_once "../autoload.php";
 
-$limit = (int) ($_GET['limit'] ?? 5);
-$page = (int) ($_GET['page'] ?? 1);
+function GET() {
+    $limit = (int) ($_GET['limit'] ?? 10);
+    $page = (int) ($_GET['page'] ?? 1);
+    $offset = ($page - 1) * $limit;
 
-$db = get_mysqli();
+    $query = "select * from product";
 
+    if (isset($_GET['id'])) {
+        $query .= " where product_id={$_GET['id']}";
+    } else $query .= " limit $limit offset $offset";
 
-$out = [];
+    $db = get_mysqli();
 
-$offset = ($page-1)*$limit;
-$res = $db->query("select * from product limit $limit offset {$offset}");
+    $res = $db->query($query);
+    if ($res->num_rows == 0) {
+        echo new Packet(ResponseCode::ERROR, "No products found.");
+        exit();
+    }
 
-while ($row = $res->fetch_assoc()) {
-    $out[] = $row;
+    $rows = $res->fetch_all(MYSQLI_ASSOC);
+
+    if (count($rows) == 1) echo new Packet(ResponseCode::SUCCESS, $rows[0]);
+    else echo new Packet(ResponseCode::SUCCESS, $rows);
 }
 
-
-echo new Packet(ResponseCode::SUCCESS, $out);
+handleRequest();
