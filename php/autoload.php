@@ -9,6 +9,7 @@ spl_autoload_register(function ($className) {
     if (file_exists($file))
         require_once $file;
 });
+require_once "vendor/handleRequest.php";
 
 function get_mysqli(): mysqli {
     return new mysqli("mysql", "root", "", "bytebox");
@@ -20,6 +21,10 @@ enum RequestMethod: int
     case GET = 2;
     case OTHER = 8;
 }
+
+/**
+ * @deprecated use `handleRequest()` method
+ */
 function use_request_method(int $method, $error = "bad request method") {
     $m = $_SERVER["REQUEST_METHOD"];
     $actual_request_method = RequestMethod::OTHER;
