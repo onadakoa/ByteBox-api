@@ -6,6 +6,9 @@ function handleRequest(): bool {
     else return false;
     return true;
 }
-function badRequest(): void {
-    echo new Packet(ResponseCode::ERROR, "bad request method");
+function badRequest(string $description, int $code = 404) {
+    http_response_code($code);
+    header("X-Error: $description");
+
+    exit();
 }
