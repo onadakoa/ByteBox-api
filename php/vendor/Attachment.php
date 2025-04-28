@@ -57,7 +57,7 @@ class Attachment
 
         $this->images = [];
         while ($row = $res->fetch_assoc()) {
-            $this->images[] = new Image($row['image_id'], $row['attachment_id'], $row['path'], $row['size']);
+            $this->images[] = new Image($row['image_id'], $row['attachment_id'], $row['path'], $row['size'], $row['type']);
         }
     }
 
