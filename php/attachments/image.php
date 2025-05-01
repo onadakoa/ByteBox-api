@@ -1,6 +1,12 @@
 <?php
 require_once "../autoload.php";
 
+$ALLOW_MIME = ["png", "jpg", "jpeg"];
+
+$ALLOW_MIME = array_map(function ($val) {
+    return "image/$val";
+}, $ALLOW_MIME);
+
 function checkDirs($path) {
     if (!file_exists($path) || !is_dir($path)) {
         mkdir($path);
@@ -20,6 +26,7 @@ function GET() {
     if (!$img) badRequest("not found");
 
     if (!file_exists($PATH . $img->getPath())) badRequest("file error", 500);
+    if (!is_file($PATH . $img->getPath())) badRequest("file error", 500);
 
     header("Content-Type: " . $img->type);
     header("Content-Length: " . $img->size);
@@ -28,7 +35,7 @@ function GET() {
 }
 
 function PUT() {
-    global $PATH;
+    global $PATH, $ALLOW_MIME;
     session_start();
 
     $id = (int) $_GET['id'] ?? -1;
@@ -42,6 +49,8 @@ function PUT() {
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $type = $finfo->buffer($content);
     finfo_close($finfo);
+    if (!$type) badRequestJson("file error", 500);
+    if (!in_array($type, $ALLOW_MIME)) badRequestJson("wrong file type", 400);
 
     $image = Image::fetch_image($db, $id);
     if (!$image) badRequestJson("not found");
