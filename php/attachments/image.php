@@ -1,12 +1,6 @@
 <?php
 require_once "../autoload.php";
 
-$ALLOW_MIME = ["png", "jpg", "jpeg"];
-
-$ALLOW_MIME = array_map(function ($val) {
-    return "image/$val";
-}, $ALLOW_MIME);
-
 function checkDirs($path) {
     if (!file_exists($path) || !is_dir($path)) {
         mkdir($path);
@@ -35,7 +29,7 @@ function GET() {
 }
 
 function PUT() {
-    global $PATH, $ALLOW_MIME;
+    global $PATH;
     session_start();
 
     $id = (int) $_GET['id'] ?? -1;
@@ -43,6 +37,7 @@ function PUT() {
     $content = file_get_contents("php://input");
     $size = strlen($content);
     if ($content === false || $size == 0) badRequestJson("wrong body", 400);
+    if ($size > MAX_SIZE) badRequestJson("file size grater than MAX_SIZE (" . MAX_SIZE . " bytes)", 400);
 
     $db = get_mysqli();
 
@@ -50,7 +45,7 @@ function PUT() {
     $type = $finfo->buffer($content);
     finfo_close($finfo);
     if (!$type) badRequestJson("file error", 500);
-    if (!in_array($type, $ALLOW_MIME)) badRequestJson("wrong file type", 400);
+    if (!in_array($type, ALLOW_MIME)) badRequestJson("wrong file type", 400);
 
     $image = Image::fetch_image($db, $id);
     if (!$image) badRequestJson("not found");
