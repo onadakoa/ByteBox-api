@@ -12,3 +12,10 @@ function badRequest(string $description, int $code = 404) {
 
     exit();
 }
+
+function badRequestJson(string $description, int $code = 404) {
+    http_response_code($code);
+    echo new Packet(ResponseCode::ERROR, $description);
+
+    exit();
+}
