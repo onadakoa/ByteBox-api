@@ -21,7 +21,7 @@ class Image
         return $this->attachment_id;
     }
 
-    public function getPath(): string
+    public function getPath(): string|null
     {
         return $this->path;
     }
