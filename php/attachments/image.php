@@ -41,7 +41,7 @@ function PUT() {
     $id = (int) $_GET['id'] ?? -1;
     if ($id < 0) badRequestJson("no id specified", 400);
     $content = file_get_contents("php://input");
-    $size = $_SERVER['CONTENT_LENGTH'];
+    $size = strlen($content);
     if ($content === false || $size == 0) badRequestJson("wrong body", 400);
 
     $db = get_mysqli();
