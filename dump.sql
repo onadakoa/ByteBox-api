@@ -161,14 +161,14 @@ CREATE TABLE `product` (
   `author_id` int unsigned NOT NULL,
   `price` decimal(10,2) unsigned NOT NULL,
   `stock` int unsigned NOT NULL DEFAULT '0',
-  `category_id` smallint unsigned NOT NULL,
+  `category_id` smallint unsigned DEFAULT NULL,
   PRIMARY KEY (`product_id`),
   KEY `attachment_id` (`attachment_id`),
   KEY `author_id` (`author_id`),
   KEY `category_id` (`category_id`),
   CONSTRAINT `author` FOREIGN KEY (`author_id`) REFERENCES `user` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `product_ibfk_1` FOREIGN KEY (`attachment_id`) REFERENCES `attachment` (`attachment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `product_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
