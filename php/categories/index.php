@@ -22,4 +22,22 @@ function GET()
     $db->close();
 }
 
+function POST() { // {name}
+    useJson();
+    if (!isset($_POST['name'])) badRequestJson("bad request", 400);
+    $name = $_POST['name'];
+    $db = get_mysqli();
+
+    try {
+        $stmt = $db->prepare("INSERT INTO category (name) VALUES (?)");
+        $stmt->bind_param("s", $name);
+        if (!$stmt->execute()) badRequestJson("error", 500);
+    } catch (mysqli_sql_exception $e) {
+        badRequestJson("error {$e->getMessage()}", 500);
+    }
+    $nId = $db->insert_id;
+    echo new Packet(ResponseCode::SUCCESS, ["id" => $nId]);
+    $db->close();
+}
+
 handleRequest();
