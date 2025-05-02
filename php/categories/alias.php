@@ -59,4 +59,17 @@ function PUT() { // {alias, category_id}
     $db->close();
 }
 
+function DELETE() {
+    useJson();
+    if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) badRequestJson("bad request", 400);
+    $id = $_GET['id'];
+
+    $db = get_mysqli();
+    $res = $db->query("delete from category_alias where alias_id=$id");
+    if (!$res) badRequestJson("error", 500);
+
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
+
 handleRequest();
