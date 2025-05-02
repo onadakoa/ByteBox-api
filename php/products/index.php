@@ -90,4 +90,25 @@ function PUT() {
     $db->close();
 }
 
+function DELETE() {
+    session_start();
+    useJson();
+    if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) badRequestJson("id incorrect", 400);
+    $id = (int) ($_GET['id'] ?? -1);
+    if ($id < 0) badRequestJson("bad id", 400);
+
+    $db = get_mysqli();
+
+    try {
+        $stmt = $db->prepare("delete from product where product_id=?");
+        $stmt->bind_param("i", $id);
+
+        if (!$stmt->execute()) badRequestJson("server error", 500);
+    } catch (mysqli_sql_exception $e) {
+        badRequestJson("server error, {$e->getMessage()}", 500);
+    }
+
+    echo new Packet(ResponseCode::SUCCESS);
+}
+
 handleRequest();
