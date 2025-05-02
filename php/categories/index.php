@@ -62,4 +62,16 @@ function PUT() { // {name, id}
     $db->close();
 }
 
+function DELETE() {
+    $id = $_GET["id"] ?? -1;
+    if ($id < 0 || !ctype_digit($id)) badRequestJson("bad request", 400);
+
+    $db = get_mysqli();
+    $res = $db->query("delete from category where category_id=$id");
+    if (!$res) badRequestJson("error", 500);
+
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
+
 handleRequest();
