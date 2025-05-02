@@ -40,4 +40,26 @@ function POST() { // {name}
     $db->close();
 }
 
+function PUT() { // {name, id}
+    useJson();
+    $body = [];
+    parse_str(file_get_contents("php://input"), $body);
+
+    if (!isset($body['id']) || !isset($body['name'])) badRequestJson("bad request", 400);
+    $id = $body['id'];
+    $name = $body['name'];
+
+    $db = get_mysqli();
+    try {
+        $stm = $db->prepare("update category set name=? where category_id=?");
+        $stm->bind_param("si", $name, $id);
+        if (!$stm->execute()) badRequestJson("error", 500);
+    } catch (mysqli_sql_exception $e) {
+        badRequestJson("error", 500);
+    }
+
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
+
 handleRequest();
