@@ -14,7 +14,7 @@ class Product
 
     private mysqli $db;
 
-    public function __construct(mysqli $db, int $product_id, $attachment_id, int $author_id, int $category_id, string $name, string $description, float $price, int $stock)
+    public function fill(mysqli $db, int $product_id, $attachment_id, int $author_id, int $category_id, string $name, string $description, float $price, int $stock)
     {
         $this->db=$db;
         $this->product_id = $product_id;
@@ -33,7 +33,24 @@ class Product
         if ($result->num_rows != 1) return false;
         $row = $result->fetch_assoc();
 
-        return new Product($db, $row['product_id'], $row['attachment_id'], $row['author_id'], $row['category_id'], $row['name'], $row['description'], $row['price'], $row['stock']);
+        $p = new Product();
+        $p->fill($db, $row['product_id'], $row['attachment_id'], $row['author_id'], $row['category_id'], $row['name'], $row['description'], $row['price'], $row['stock']);
+        return $p;
+    }
+
+    /**
+     * @return Product[]|false
+     */
+    public static function fetch_all(mysqli $db, int $limit = 10, int $offset = 0) {
+        $query = "select * from product limit $limit offset $offset";
+        $res = $db->query($query);
+        if ($res->num_rows < 1) return false;
+        $out = [];
+        while ($row = $res->fetch_object("Product")) {
+            $out[] = $row;
+        }
+
+        return $out;
     }
 
     public function fetch_author(): User|false {
