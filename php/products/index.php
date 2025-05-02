@@ -62,4 +62,32 @@ function POST() { // {name, description, attachment_id?, author_id, price, stock
     $db->close();
 }
 
+function PUT() {
+    session_start();
+    useJson();
+    $required = ["name", "description", "price", "stock", "category_id", "id"];
+    $obj = [];
+    $body = [];
+    parse_str(file_get_contents("php://input"), $body);
+    foreach ($required as $field) {
+        if (!isset($body[$field])) badRequestJson("missing field $field", 400);
+        $obj[$field] = $body[$field];
+    }
+    $obj['attachment_id'] = $body['attachment_id'] ?? null;
+
+    $db = get_mysqli();
+
+    try {
+        $stmt = $db->prepare("update product set name=?, description=?, price=?, stock=?, category_id=?, attachment_id=? where product_id=?");
+        $stmt->bind_param("ssdiiii", $obj['name'], $obj['description'], $obj['price'], $obj['stock'], $obj['category_id'], $obj['attachment_id'], $obj['id']);
+
+        if (!$stmt->execute()) badRequestJson("server error", 500);
+    } catch (mysqli_sql_exception $e) {
+        badRequestJson("server error, {$e->getMessage()}", 500);
+    }
+
+    echo new Packet(ResponseCode::SUCCESS, ["id" => $obj['id']]);
+    $db->close();
+}
+
 handleRequest();
