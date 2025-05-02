@@ -5,7 +5,7 @@ class Product
     public int $product_id;
     public int|null $attachment_id;
     public int $author_id;
-    public int $category_id;
+    public int|null $category_id;
 
     public string $name;
     public string $description;
