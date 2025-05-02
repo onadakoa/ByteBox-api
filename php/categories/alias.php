@@ -14,12 +14,12 @@ function GET() {
     $db->close();
 }
 
-function POST() { // {alias, category_id?}
+function POST() { // {alias, category_id}
     useJson();
     if (!isset($_POST['alias'])) badRequestJson("bad request", 400);
     $alias = $_POST['alias'];
-    if (isset($_POST['category_id']) && !ctype_digit($_POST['category_id'])) badRequestJson("bad request", 400);
-    $category_id = $_POST['category_id'] ?? null;
+    if (!isset($_POST['category_id']) || !ctype_digit($_POST['category_id'])) badRequestJson("bad request", 400);
+    $category_id = $_POST['category_id'];
 
     $db = get_mysqli();
     try {
