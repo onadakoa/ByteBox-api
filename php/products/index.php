@@ -2,28 +2,27 @@
 require_once "../autoload.php";
 
 function GET() {
+    useJson();
+
     $limit = (int) ($_GET['limit'] ?? 10);
     $page = (int) ($_GET['page'] ?? 1);
     $offset = ($page - 1) * $limit;
-
-    $query = "select * from product";
-
-    if (isset($_GET['id'])) {
-        $query .= " where product_id={$_GET['id']}";
-    } else $query .= " limit $limit offset $offset";
+    $id = (int) ($_GET['id'] ?? -1);
 
     $db = get_mysqli();
 
-    $res = $db->query($query);
-    if ($res->num_rows == 0) {
-        echo new Packet(ResponseCode::ERROR, "No products found.");
-        exit();
+    if ($id==-1) {
+        $products = Product::fetch_all($db, $limit, $offset);
+        if (!$products) badRequestJson("not found", 500);
+        echo new Packet(ResponseCode::SUCCESS, $products);
+    }
+    else {
+        $product = Product::fetch_by_id($db, $id);
+        if (!$product) badRequestJson("not found", 404);
+        echo new Packet(ResponseCode::SUCCESS, $product);
     }
 
-    $rows = $res->fetch_all(MYSQLI_ASSOC);
-
-    if (count($rows) == 1) echo new Packet(ResponseCode::SUCCESS, $rows[0]);
-    else echo new Packet(ResponseCode::SUCCESS, $rows);
+    $db->close();
 }
 
 handleRequest();
