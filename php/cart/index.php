@@ -54,5 +54,26 @@ function POST() { // {user_id, product_id, quantity}
     $db->close();
 }
 
+function PUT() { // {id, quantity}
+    useJson();
+
+    $body = [];
+    parse_str(file_get_contents("php://input"), $body);
+
+    $required = ["id", "quantity"];
+    foreach ($required as $field) {
+        if (!isset($body[$field])) badRequestJson("$field not specified", 400);
+        if (!ctype_digit($body[$field])) badRequestJson("bad $field", 400);
+    }
+
+    $db = get_mysqli();
+
+    $item = CartItem::fetch_cart_item($db, $body['id']);
+    if (!$item) badRequestJson("not found");
+
+    if (!$item->update($db, $body['quantity'])) badRequestJson("error", 500);
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
 
 handleRequest();
