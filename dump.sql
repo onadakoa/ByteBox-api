@@ -209,7 +209,7 @@ CREATE TABLE `user` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `first_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `last_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `persmission` tinyint unsigned NOT NULL DEFAULT '0',
+  `permission` tinyint unsigned NOT NULL DEFAULT '0',
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`user_id`)
