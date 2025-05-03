@@ -19,7 +19,3 @@ function badRequestJson(string $description, int $code = 404) {
 
     exit();
 }
-
-function useJson() {
-    header("Content-type: application/json");
-}

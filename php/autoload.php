@@ -11,6 +11,7 @@ spl_autoload_register(function ($className) {
 });
 require_once "vendor/handleRequest.php";
 require_once "vendor/settings.php";
+require_once "vendor/hook.php";
 
 function get_mysqli(): mysqli {
     return new mysqli("mysql", "root", "", "bytebox");
