@@ -16,6 +16,11 @@ class CartItem
         $this->quantity = $quantity;
     }
 
+    public function update(mysqli $db, $quantity) {
+       $query = "update cart_item set quantity=$quantity where cart_item_id={$this->cart_item_id}";
+       return $db->query($query);
+    }
+
     public static function fetch_cart_item(mysqli $db, int $id): CartItem|false
     {
         $query = "select * from cart_item where cart_item_id=$id";
