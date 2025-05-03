@@ -1,35 +1,27 @@
 <?php
 require_once 'autoload.php';
-use_request_method(RequestMethod::POST->value);
 
-session_start();
+function POST() {
+    session_start();
+    useJson();
 
-if (isset($_SESSION['TOKEN'])) {
-    echo new Packet(ResponseCode::ERROR, "Already logged in");
-    exit();
-}
-if (empty($_POST['login']) || empty($_POST['password'])) {
-    echo new Packet(ResponseCode::ERROR, "Invalid request");
-    exit();
-}
+    $headers = getallheaders();
 
-$db = get_mysqli();
+    $token = $_SESSION['TOKEN'] ?? $headers['TOKEN'] ?? -1;
+    if ($token != -1) badRequestJson("already logged in", 400);
 
-$login = $_POST['login'];
-$password = $_POST['password'];
+    $login = $_POST['login'] ?? -1;
+    $password = $_POST['password'] ?? -1;
+    if ($login == -1 || $password == -1) badRequestJson("bad request", 400);
 
-$res = $db->query("SELECT password, token FROM user WHERE login = '$login'");
-if ($res->num_rows == 0) {
-    echo new Packet(ResponseCode::ERROR, "User not found");
-    exit();
-}
-$row = $res->fetch_assoc();
-if (!password_verify($password, $row['password'])) {
-    echo new Packet(ResponseCode::ERROR, "Wrong password");
-    exit();
+    $db = get_mysqli();
+    $user = User::user_by_credentials($db, $login, $password);
+    if (!$user) badRequestJson("not found");
+
+    $_SESSION['TOKEN'] = $user->getToken();
+
+    echo new Packet(ResponseCode::SUCCESS, $user);
+    $db->close();
 }
 
-$_SESSION['TOKEN'] = $row['token'];
-echo new Packet(ResponseCode::SUCCESS, "Successfully logged in");
-
-$db->close();
+handleRequest();
