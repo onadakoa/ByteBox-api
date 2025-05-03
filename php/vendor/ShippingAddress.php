@@ -2,7 +2,7 @@
 
 class ShippingAddress
 {
-    public int $id;
+    public int $shipping_address_id;
     public int $user_id;
     public string $first_name;
     public string $last_name;
@@ -10,14 +10,12 @@ class ShippingAddress
     public string $city;
     public string $postal_code;
     public string $building_number;
+    public string $phone_number;
     public string|null $apartment_number;
 
-    private mysqli $db;
-
-    private function __construct(mysqli $db, int $id, int $user_id, string $first_name, string $last_name, string $street, string $city, string $postal_code, string $building_number, $apartment_number)
+    private function fill(int $id, int $user_id, string $first_name, string $last_name, string $street, string $city, string $postal_code, string $building_number, $apartment_number, string $phone_number)
     {
-        $this->db = $db;
-        $this->id = $id;
+        $this->shipping_address_id = $id;
         $this->user_id = $user_id;
         $this->first_name = $first_name;
         $this->last_name = $last_name;
@@ -26,6 +24,7 @@ class ShippingAddress
         $this->postal_code = $postal_code;
         $this->building_number = $building_number;
         $this->apartment_number = $apartment_number;
+        $this->phone_number = $phone_number;
     }
 
     public static function fetch_by_id(mysqli $db, int $id): ShippingAddress|false
@@ -33,12 +32,26 @@ class ShippingAddress
         $query = "select * from shipping_address where shipping_address_id=$id";
         $result = $db->query($query);
         if ($result->num_rows != 1) return false;
-        $row = $result->fetch_assoc();
-        return new ShippingAddress($db, $row['shipping_address_id'], $row['user_id'], $row['first_name'], $row['last_name'], $row['street'], $row['city'], $row['postal_code'], $row['building_number'], $row['apartment_number']);
+        return $result->fetch_object("ShippingAddress");
     }
 
-    public function fetch_author()
+    /**
+     * @return ShippingAddress[]|false
+     */
+    public static function fetch_all(mysqli $db, $user_id) {
+        $res = $db->query("select * from shipping_address where user_id={$user_id}");
+        if (!$res) return false;
+
+        $out = [];
+        while ($row = $res->fetch_object("ShippingAddress")) {
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    public function fetch_author(mysqli $db)
     {
-        return User::user_by_id($this->db, $this->user_id);
+        return User::user_by_id($db, $this->user_id);
     }
 }
