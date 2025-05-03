@@ -17,7 +17,7 @@ class User
         $this->user_id = $row->user_id;
         $this->login = $row->login;
         $this->password = $row->password;
-        $this->permission = $row->persmission;
+        $this->permission = $row->permission;
         $this->creation_date = $row->creation_date;
         $this->token = $row->token;
     }
@@ -99,6 +99,30 @@ class User
         $u->setup($row);
 
         return $u;
+    }
+
+    /**
+     * @return User[]|false
+     */
+    public static function user_by_search(mysqli $db, string|null $search, int|null $limit, int|null $offset) {
+        $phrase = "%{$search}%";
+        $limit = $limit ?? 20;
+        $offset = $offset ?? 0;
+
+        $stmt = $db->prepare("select *, UNIX_TIMESTAMP(creation_date) as creation_date from user where first_name like ? or last_name like ? or login like ? or user_id like ? limit ? offset ?");
+        $stmt->bind_param("ssssii", $phrase, $phrase, $phrase, $phrase, $limit, $offset);
+        if (!$stmt->execute()) return false;
+        $res = $stmt->get_result();
+
+        $out = [];
+
+        while ($row = $res->fetch_object()) {
+            $u = new User();
+            $u->setup($row);
+            $out[] = $u;
+        }
+
+        return $out;
     }
 
     public static function create_token(): string {
