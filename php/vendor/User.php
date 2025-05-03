@@ -9,7 +9,7 @@ class User
     public string $last_name;
     public int $permission;
     public int $creation_date;
-    public string $token;
+    private string $token;
 
     private function setup($row) {
         $this->first_name = $row->first_name;
@@ -20,6 +20,11 @@ class User
         $this->permission = $row->persmission;
         $this->creation_date = $row->creation_date;
         $this->token = $row->token;
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
     }
 
     public static function user_by_id(mysqli $db, int $id) {
