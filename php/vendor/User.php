@@ -36,10 +36,11 @@ class User
         $first_name = $obj['first_name'] ?? $this->first_name;
         $last_name = $obj['last_name'] ?? $this->last_name;
         $permission = $obj['permission'] ?? $this->permission;
+        $login = $login ?? $this->login;
 
         try {
             $stmt = $db->prepare("update user set login=?, password=?, first_name=?, last_name=?, permission=?, token=? where user_id=?");
-            $stmt->bind_param("ssssi", $login, $hash_password, $first_name, $last_name, $permission, $token, $this->user_id);
+            $stmt->bind_param("ssssssi", $login, $hash_password, $first_name, $last_name, $permission, $token, $this->user_id);
             if (!$stmt->execute()) badRequestJson("error", 500);
         } catch (mysqli_sql_exception $e) {
             return false;
