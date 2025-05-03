@@ -138,7 +138,7 @@ class User
         $permission = $obj['permission'] ?? 0;
 
         try {
-            $stmt = $db->prepare("insert into user (login, password, token, first_name, last_name, persmission) value (?, ?, ?, ?, ?, ?)");
+            $stmt = $db->prepare("insert into user (login, password, token, first_name, last_name, permission) value (?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("sssssi",
                 $login,
                 $hash_password,
