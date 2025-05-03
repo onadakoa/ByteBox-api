@@ -52,6 +52,9 @@ class User
         $this->last_name = $last_name;
         return true;
     }
+    public function delete(mysqli $db) {
+        return $db->query("delete from user where user_id={$this->user_id}");
+    }
 
     public static function user_by_id(mysqli $db, int $id) {
         $query = "SELECT *, UNIX_TIMESTAMP(creation_date) as creation_date FROM user WHERE user_id = $id LIMIT 1";
