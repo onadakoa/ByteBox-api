@@ -6,10 +6,7 @@ function GET() {
     useJson();
     $headers = getallheaders();
 
-    $token = null;
-    if (isset($_SESSION['token'])) $token = $_SESSION['TOKEN'];
-    else if (isset($headers['TOKEN'])) $token = $headers['TOKEN'];
-    if (!$token) badRequestJson("no auth", 400);
+    $token = useToken();
 
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
