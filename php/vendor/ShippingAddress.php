@@ -27,6 +27,29 @@ class ShippingAddress
         $this->phone_number = $phone_number;
     }
 
+    public function delete(mysqli $db) {
+        return $db->query("delete from shipping_address where shipping_address_id={$this->shipping_address_id}");
+    }
+    public function update(mysqli $db, array $obj) {
+        try {
+            $stmt = $db->prepare("update shipping_address set first_name=?, last_name=?, phone_number=?, city=?, postal_code=?, building_number=?, apartment_number=? where shipping_address_id=?");
+            $apartment_number = $obj['apartment_number'] ?? null;
+            $stmt->bind_param("sssssssi",
+                $obj['first_name'],
+                $obj['last_name'],
+                $obj['phone_number'],
+                $obj['city'],
+                $obj['postal_code'],
+                $obj['building_number'],
+                $apartment_number,
+                $this->shipping_address_id
+            );
+            return $stmt->execute();
+        } catch (mysqli_sql_exception $e) {
+            return false;
+        }
+    }
+
     public static function fetch_by_id(mysqli $db, int $id): ShippingAddress|false
     {
         $query = "select * from shipping_address where shipping_address_id=$id";
