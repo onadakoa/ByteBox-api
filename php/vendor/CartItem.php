@@ -21,6 +21,10 @@ class CartItem
        return $db->query($query);
     }
 
+    public function delete(mysqli $db) {
+        return $db->query("delete from cart_item where cart_item_id={$this->cart_item_id}");
+    }
+
     public static function fetch_cart_item(mysqli $db, int $id): CartItem|false
     {
         $query = "select * from cart_item where cart_item_id=$id";
