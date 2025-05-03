@@ -76,4 +76,19 @@ function PUT() { // {id, quantity}
     $db->close();
 }
 
+function DELETE() {
+    useJson();
+
+    if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) badRequestJson("bad id", 400);
+    $id = $_GET['id'];
+
+    $db =  get_mysqli();
+
+    $item = CartItem::fetch_cart_item($db, $id);
+    if (!$item) badRequestJson("not found");
+    if (!$item->delete($db)) badRequestJson("error", 500);
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
+
 handleRequest();
