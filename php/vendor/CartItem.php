@@ -51,6 +51,13 @@ class CartItem
         return $out;
     }
 
+    public static function fetch_by_product_id(mysqli $db, int $user_id, int $product_id) {
+        $query = "select * from cart_item where product_id={$product_id} and user_id={$user_id}";
+        $res = $db->query($query);
+        if (!$res) return false;
+        return $res->fetch_object("CartItem");
+    }
+
     public function fetch_user(mysqli $db): User|false
     {
         return User::user_by_id($db, $this->user_id);
