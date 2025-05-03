@@ -27,7 +27,7 @@ class Category
 
         $out = new Category($id, $row["name"]);
 
-        $query = "select alias, alias_id from category_alias where category_id=1";
+        $query = "select * from category_alias where category_id=$id";
         $result = $db->query($query);
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
