@@ -25,12 +25,8 @@ function GET() {
 function POST() {
     session_start();
     useJson();
-    $headers = getallheaders();
 
-    $token = null;
-    if (isset($_SESSION['token'])) $token = $_SESSION['TOKEN'];
-    else if (isset($headers['TOKEN'])) $token = $headers['TOKEN'];
-    if (!$token) badRequestJson("no auth", 400);
+    $token = useToken();
 
     $required = [
         "building_number",
@@ -73,6 +69,59 @@ function POST() {
     }
 
     $db->close();
+}
+
+function DELETE() {
+    session_start();
+    useJson();
+    $token = useToken();
+
+    if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) badRequestJson("no id", 400);
+    $id = $_GET['id'];
+
+    $db = get_mysqli();
+    $user = User::user_by_token($db, $token);
+    if (!$user) badRequestJson("no auth", 400);
+    $address = ShippingAddress::fetch_by_id($db, $id);
+    if (!$address) badRequestJson("not found");
+    if ($user->user_id != $address->user_id) badRequestJson("not found", 404);
+
+    if (!$address->delete($db)) badRequestJson("error", 500);
+    echo new Packet(ResponseCode::SUCCESS);
+    $db->close();
+}
+
+function PUT() {
+    session_start();
+    useJson();
+    $token = useToken();
+
+    $body = useFormData();
+
+    $required = [
+        "id",
+        "building_number",
+        "city",
+        "first_name",
+        "last_name",
+        "phone_number",
+        "postal_code",
+        "street",
+    ];
+    foreach ($required as $field) {
+        if (!isset($body[$field])) badRequestJson("missing $field", 400);
+    }
+
+    $db = get_mysqli();
+
+    $user = User::user_by_token($db, $token);
+    if (!$user) badRequestJson("no auth", 400);
+    $address = ShippingAddress::fetch_by_id($db, $body['id']);
+    if (!$address) badRequestJson("not found");
+
+    if (!$address->update($db, $body)) badRequestJson("error", 500);
+    $db->close();
+    echo new Packet(ResponseCode::SUCCESS);
 }
 
 handleRequest();
