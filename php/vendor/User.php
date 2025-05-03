@@ -27,6 +27,32 @@ class User
         return $this->token;
     }
 
+    public function update(mysqli $db, string|null $login, string|null $password, array $obj = []): bool {
+        $hash_password = $this->password;
+        if ($password) $hash_password=password_hash($password, PASSWORD_BCRYPT);
+        $token = $this->token;
+        if ($password) $token = User::create_token();
+
+        $first_name = $obj['first_name'] ?? $this->first_name;
+        $last_name = $obj['last_name'] ?? $this->last_name;
+        $permission = $obj['permission'] ?? $this->permission;
+
+        try {
+            $stmt = $db->prepare("update user set login=?, password=?, first_name=?, last_name=?, permission=?, token=? where user_id=?");
+            $stmt->bind_param("ssssi", $login, $hash_password, $first_name, $last_name, $permission, $token, $this->user_id);
+            if (!$stmt->execute()) badRequestJson("error", 500);
+        } catch (mysqli_sql_exception $e) {
+            return false;
+        }
+        $this->login = $login;
+        $this->password = $hash_password;
+        $this->token = $token;
+        $this->permission = $permission;
+        $this->first_name = $first_name;
+        $this->last_name = $last_name;
+        return true;
+    }
+
     public static function user_by_id(mysqli $db, int $id) {
         $query = "SELECT *, UNIX_TIMESTAMP(creation_date) as creation_date FROM user WHERE user_id = $id LIMIT 1";
         $res = $db->query($query);
@@ -70,6 +96,36 @@ class User
         $u->setup($row);
 
         return $u;
+    }
+
+    public static function create_token(): string {
+        return bin2hex(random_bytes(8));
+    }
+
+    public static function insert_new(mysqli $db, string $login, string $password, array $obj): User|false { // {first_name, last_name, permission}
+        $hash_password = password_hash($password, PASSWORD_BCRYPT);
+        $token = User::create_token();
+
+        $first_name = $obj['first_name'] ?? "";
+        $last_name = $obj['last_name'] ?? "";
+        $permission = $obj['permission'] ?? 0;
+
+        try {
+            $stmt = $db->prepare("insert into user (login, password, token, first_name, last_name, persmission) value (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssi",
+                $login,
+                $hash_password,
+                $token,
+                $first_name,
+                $last_name,
+                $permission
+            );
+            if (!$stmt->execute()) return false;
+        } catch (mysqli_sql_exception $e) {
+            return false;
+        }
+
+        return User::user_by_id($db, $db->insert_id);
     }
 
 }
