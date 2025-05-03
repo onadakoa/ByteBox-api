@@ -28,5 +28,31 @@ function GET() { // {user_id, id}
     $db->close();
 }
 
+function POST() { // {user_id, product_id, quantity}
+    useJson();
+
+    $required = ["user_id", "product_id", "quantity"];
+    $body = [];
+    foreach ($required as $field) {
+        if (!isset($_POST[$field])) badRequestJson("$field not specified", 400);
+        if (!ctype_digit($_POST[$field])) badRequestJson("bad $field", 400);
+        $body[$field] = $_POST[$field];
+    }
+
+    $db = get_mysqli();
+
+    try {
+        $stmt= $db->prepare("insert into cart_item(user_id, product_id, quantity) VALUE (?, ?, ?)");
+        $stmt->bind_param("iii", $body['user_id'], $body['product_id'], $body['quantity']);
+        $res = $stmt->execute();
+        if (!$res) badRequestJson("error", 500);
+        echo new Packet(ResponseCode::SUCCESS, ["id" => $db->insert_id]);
+    } catch (mysqli_sql_exception $e) {
+        badRequestJson("error {$e->getMessage()}", 500);
+    }
+
+    $db->close();
+}
+
 
 handleRequest();
