@@ -9,6 +9,8 @@ spl_autoload_register(function ($className) {
     if (file_exists($file))
         require_once $file;
 });
+require_once "vendor/Order.php";
+
 require_once "vendor/handleRequest.php";
 require_once "vendor/settings.php";
 require_once "vendor/hook.php";

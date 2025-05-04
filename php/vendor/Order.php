@@ -1,0 +1,131 @@
+<?php
+
+enum OrderStatus : string
+{
+    case pending = "pending";
+    case paid = "paid";
+    case shipping = "shipping";
+    case delivered = "delivered";
+    case canceled = "canceled";
+}
+
+class OrderItem
+{
+    public int $order_item_id;
+    public int $order_id;
+    public int $product_id;
+    public int $quantity;
+    public float $price;
+}
+
+class Order
+{
+    public int $order_id;
+    public int $user_id;
+    public int $created_at;
+    public string $status;
+    public int $shipping_address_id;
+
+    public float|null $total_price;
+
+    /**
+     * @var OrderItem[]
+     */
+    public array $items = [];
+
+    public function fill_items(mysqli $db): bool {
+        $this->items = [];
+        $res = $db->query("select * from order_item where order_id={$this->order_id}");
+        if (!$res) return false;
+
+        while ($row = $res->fetch_object("OrderItem")) {
+            $this->items[] = $row;
+        }
+        return true;
+    }
+
+    public function refresh(mysqli $db): bool {
+        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$this->order_id}");
+        if (!$res) return false;
+        $row = $res->fetch_assoc();
+
+        $this->user_id = $row['user_id'];
+        $this->created_at = $row['created_at'];
+        $this->status = $row['status'];
+        $this->shipping_address_id = $row['shipping_address_id'];
+
+        $this->fill_items($db);
+
+        return true;
+    }
+
+    public function delete(mysqli $db): bool {
+        return $db->query("delete from `order` where order_id={$this->order_id}");
+    }
+
+    public function update_status(mysqli $db, OrderStatus $status): bool {
+        return $db->query("update `order` set status='{$status->value}' where order_id={$this->order_id}");
+    }
+
+    public function append_item(mysqli $db, int $product_id, int $price, int $quantity): bool {
+        $res = $db->query("insert into order_item (order_id, product_id, price, quantity) value ({$this->order_id}, {$product_id}, {$price}, {$quantity})");
+        return $res;
+    }
+
+    /**
+     * @return Order[]|false
+     */
+    public static function fetch_by_user_id(mysqli $db, int $user_id): array|false {
+        $user = User::user_by_id($db, $user_id);
+        if (!$user) return false;
+
+        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where user_id={$user_id}");
+        if (!$res) return false;
+
+        $out = [];
+        while ($row = $res->fetch_object("Order")) {
+            $row->fill_items($db);
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return Order|false
+     */
+    public static function fetch_by_id(mysqli $db, int $id): Order|false {
+        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$id}");
+        if (!$res) return false;
+
+        $row = $res->fetch_object("Order");
+        if (!$row) return false;
+        $row->fill_items($db);
+
+        return $row;
+    }
+
+
+    /**
+     * @return Order[]|false
+     */
+    public static function fetch_all(mysqli $db, int $limit = 20, int $offset = 0): array|false {
+        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o limit {$limit} offset {$offset}");
+        if (!$res) return false;
+
+        $out = [];
+        while ($row = $res->fetch_object("Order")) {
+            $row->fill_items($db);
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id): Order|false {
+        $res = $db->query("insert into `order` (user_id, shipping_address_id) value ({$user_id}, {$shipping_address_id})");
+        if (!$res) return false;
+        return Order::fetch_by_id($db, $db->insert_id);
+    }
+
+}
