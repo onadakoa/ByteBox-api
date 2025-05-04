@@ -127,7 +127,7 @@ class User
     }
 
     public static function create_token(): string {
-        return bin2hex(random_bytes(8));
+        return bin2hex(random_bytes(8)) . "." . time();
     }
 
     public static function insert_new(mysqli $db, string $login, string $password, array $obj): User|false { // {first_name, last_name, permission}
