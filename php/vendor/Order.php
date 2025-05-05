@@ -26,6 +26,15 @@ class Order
     public string $status;
     public int $shipping_address_id;
 
+    public string|null $first_name;
+    public string|null $last_name;
+    public string|null $phone_number;
+    public string|null $postal_code;
+    public string|null $city;
+    public string|null $street;
+    public string|null $building_number;
+    public string|null $apartment_number;
+
     public float|null $total_price;
 
     /**
@@ -49,10 +58,10 @@ class Order
         if (!$res) return false;
         $row = $res->fetch_assoc();
 
-        $this->user_id = $row['user_id'];
-        $this->created_at = $row['created_at'];
-        $this->status = $row['status'];
-        $this->shipping_address_id = $row['shipping_address_id'];
+        foreach ($row as $k => $v) {
+            if (!isset($this->$k)) continue;
+            $this->$k = $v;
+        }
 
         $this->fill_items($db);
 
