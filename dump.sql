@@ -114,7 +114,6 @@ CREATE TABLE `order` (
   `order_id` int unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `total_price` decimal(10,2) unsigned NOT NULL,
   `status` enum('pending','paid','shipping','delivered','canceled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `shipping_address_id` int unsigned NOT NULL,
   PRIMARY KEY (`order_id`),
