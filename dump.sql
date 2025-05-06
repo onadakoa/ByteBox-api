@@ -115,7 +115,6 @@ CREATE TABLE `order` (
   `user_id` int unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('pending','paid','shipping','delivered','canceled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `shipping_address_id` int unsigned NOT NULL,
   `first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `phone_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -126,9 +125,7 @@ CREATE TABLE `order` (
   `apartment_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`order_id`),
   KEY `user_id` (`user_id`),
-  KEY `shipping_address_id` (`shipping_address_id`),
-  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `order_ibfk_2` FOREIGN KEY (`shipping_address_id`) REFERENCES `shipping_address` (`shipping_address_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
