@@ -22,9 +22,9 @@ class Order
 {
     public int $order_id;
     public int $user_id;
+    public int|null $payment_method_id;
     public int $created_at;
     public string $status;
-    public int $shipping_address_id;
 
     public string|null $first_name;
     public string|null $last_name;
@@ -59,7 +59,7 @@ class Order
         $row = $res->fetch_assoc();
 
         foreach ($row as $k => $v) {
-            if (!isset($this->$k)) continue;
+            if (!property_exists($this, $k)) continue;
             $this->$k = $v;
         }
 
@@ -76,7 +76,7 @@ class Order
         return $db->query("update `order` set status='{$status->value}' where order_id={$this->order_id}");
     }
 
-    public function append_item(mysqli $db, int $product_id, int $price, int $quantity): bool {
+    public function append_item(mysqli $db, int $product_id, float $price, int $quantity): bool {
         $res = $db->query("insert into order_item (order_id, product_id, price, quantity) value ({$this->order_id}, {$product_id}, {$price}, {$quantity})");
         return $res;
     }
@@ -132,7 +132,11 @@ class Order
     }
 
     public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id): Order|false {
-        $res = $db->query("insert into `order` (user_id, shipping_address_id) value ({$user_id}, {$shipping_address_id})");
+        $address = ShippingAddress::fetch_by_id($db, $shipping_address_id);
+        if (!$address) return false;
+        $stmt = $db->prepare("insert into `order` (user_id, first_name, last_name, phone_number, city, postal_code, building_number, apartment_number) value (?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("isssssss", $user_id, $address->first_name, $address->last_name, $address->phone_number, $address->city, $address->postal_code, $address->building_number, $address->apartment_number);
+        $res = $stmt->execute();
         if (!$res) return false;
         return Order::fetch_by_id($db, $db->insert_id);
     }

@@ -14,7 +14,7 @@ class Product
 
     private mysqli $db;
 
-    public function fill(mysqli $db, int $product_id, $attachment_id, int $author_id, int $category_id, string $name, string $description, float $price, int $stock)
+    public function fill(mysqli $db, int $product_id, $attachment_id, int $author_id, int|null $category_id, string $name, string $description, float $price, int $stock)
     {
         $this->db=$db;
         $this->product_id = $product_id;
