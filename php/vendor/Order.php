@@ -141,4 +141,23 @@ class Order
         return Order::fetch_by_id($db, $db->insert_id);
     }
 
+    public static function insert_from_cart(mysqli $db, int $user_id, $shipping_address_id, bool $delete_cart = true): Order|false {
+        $cart_items = CartItem::fetch_by_user_id($db, $user_id);
+        if (!$cart_items) return false;
+
+        $nOrder = Order::insert_new($db, $user_id, $shipping_address_id);
+        if (!$nOrder) return false;
+
+        foreach ($cart_items as $item) {
+            $product = Product::fetch_by_id($db, $item->product_id);
+            if (!$product) continue;
+            $nOrder->append_item($db, $item->product_id, $product->price, $item->quantity);
+            if ($delete_cart)
+                $item->delete($db);
+        }
+
+        $nOrder->refresh($db);
+        return $nOrder;
+    }
+
 }
