@@ -12,7 +12,7 @@ function GET() { // {id?, user_id?}
 
     $db = get_mysqli();
     $author = User::user_by_token($db, $token);
-    if (!$author) badRequestJson("no auth", 400);
+    if (!$author) badRequestJson("no auth", 401);
 
     if ($id != -1) {
         $order = Order::fetch_by_id($db, $id);
@@ -20,7 +20,7 @@ function GET() { // {id?, user_id?}
         if ($author->permission==0 && $author->user_id != $order->user_id) badRequestJson("not found");
         echo new Packet(ResponseCode::SUCCESS, $order);
     } else if ($user_id != -1) {
-        if ($author->permission==0 && $author->user_id != $user_id) badRequestJson("no auth", 400);
+        if ($author->permission==0 && $author->user_id != $user_id) badRequestJson("no auth", 401);
         $orders = Order::fetch_by_user_id($db, $user_id);
         if (!$orders) badRequestJson("not found");
         echo new Packet(ResponseCode::SUCCESS, $orders);
@@ -47,7 +47,7 @@ function PUT() { // {id, status}
 
     $db = get_mysqli();
     $author = User::user_by_token($db, $token);
-    if (!$author || $author->permission==0) badRequestJson("no auth", 400);
+    if (!$author || $author->permission==0) badRequestJson("no auth", 401);
     $order = Order::fetch_by_id($db, $id);
     if (!$order) badRequestJson("not found");
 

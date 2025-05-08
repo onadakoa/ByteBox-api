@@ -11,11 +11,11 @@ function GET() { // {id}
 
     $db = get_mysqli();
     $author = User::user_by_token($db, $token);
-    if (!$author) badRequestJson("no auth", 400);
+    if (!$author) badRequestJson("no auth", 401);
     $order = Order::fetch_by_id($db, $id);
     if (!$order) badRequestJson("not found");
 
-    if ($author->permission==0 && $author->user_id!=$order->user_id) badRequestJson("no auth", 400);
+    if ($author->permission==0 && $author->user_id!=$order->user_id) badRequestJson("no auth", 401);
     if (!$order->update_status($db, OrderStatus::canceled)) badRequestJson("error", 500);
 
     $order->refresh($db);

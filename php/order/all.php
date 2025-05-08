@@ -13,7 +13,7 @@ function GET() { // {limit?, page?}
 
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
-    if (!$user || $user->permission==0) badRequestJson("no auth", 400);
+    if (!$user || $user->permission==0) badRequestJson("no auth", 401);
 
     $orders = Order::fetch_all($db, $limit, $offset);
     if (!$orders) badRequestJson("error" ,500);

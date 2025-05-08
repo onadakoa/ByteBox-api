@@ -10,7 +10,7 @@ function useToken(bool $strict = true) {
     $token = null;
     if (isset($_SESSION['token'])) $token = $_SESSION['TOKEN'];
     else if (isset($headers['TOKEN'])) $token = $headers['TOKEN'];
-    if (!$token && $strict) badRequestJson("no auth", 400);
+    if (!$token && $strict) badRequestJson("no auth", 401);
 
     return $token;
 }

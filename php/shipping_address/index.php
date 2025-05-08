@@ -10,7 +10,7 @@ function GET() {
 
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
-    if (!$user) badRequestJson("no auth", 400);
+    if (!$user) badRequestJson("no auth", 401);
 
     $address = ShippingAddress::fetch_all($db, $user->user_id);
     if (!$address) badRequestJson("not found");
@@ -41,7 +41,7 @@ function POST() {
 
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
-    if (!$user) badRequestJson("no auth", 400);
+    if (!$user) badRequestJson("no auth", 401);
 
     try {
     $stmt = $db->prepare("insert into shipping_address (user_id, first_name, last_name, phone_number, postal_code, city, street, building_number, apartment_number)
@@ -78,7 +78,7 @@ function DELETE() {
 
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
-    if (!$user) badRequestJson("no auth", 400);
+    if (!$user) badRequestJson("no auth", 401);
     $address = ShippingAddress::fetch_by_id($db, $id);
     if (!$address) badRequestJson("not found");
     if ($user->user_id != $address->user_id) badRequestJson("not found", 404);
@@ -112,7 +112,7 @@ function PUT() {
     $db = get_mysqli();
 
     $user = User::user_by_token($db, $token);
-    if (!$user) badRequestJson("no auth", 400);
+    if (!$user) badRequestJson("no auth", 401);
     $address = ShippingAddress::fetch_by_id($db, $body['id']);
     if (!$address) badRequestJson("not found");
 

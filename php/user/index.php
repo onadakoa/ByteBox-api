@@ -21,7 +21,7 @@ function GET() {
         if (!$user) badRequestJson("not found");
         echo new Packet(ResponseCode::SUCCESS, $user);
     } else if (isset($_GET['search'])) {
-        if ($author->permission == 0) badRequestJson("no permission", 400);
+        if ($author->permission == 0) badRequestJson("no permission", 403);
         $users = User::user_by_search($db, $search, $limit, $offset);
         if (!$users) badRequestJson("not found");
         echo new Packet(ResponseCode::SUCCESS, $users);
@@ -69,7 +69,7 @@ function DELETE() {
         exit();
     }
 
-    if ($author->permission == 0) badRequestJson("no permission", 400);
+    if ($author->permission == 0) badRequestJson("no permission", 403);
     $target = User::user_by_id($db, $id);
     if (!$target) badRequestJson("not found");
 

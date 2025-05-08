@@ -6,10 +6,12 @@ function GET() {
     $id = (int) ($_GET['id'] ?? -1);
     if ($id < 0) {
         if (!isset($_SESSION['TOKEN'])) {
+            http_response_code(401);
             echo new Packet(ResponseCode::ERROR, "no auth");
             exit();
         }
         if (User::user_by_token($db, $_SESSION['TOKEN'])->permission != 1) {
+            http_response_code(401);
             echo new Packet(ResponseCode::ERROR, "no auth");
             exit();
         }
@@ -34,7 +36,7 @@ function POST() {
     $db = get_mysqli();
     $token = $_SESSION['TOKEN'] ?? -1;
     $user = User::user_by_token($db, $token);
-    if (!$user || $user->permission == 0) badRequestJson("no auth", 400);
+    if (!$user || $user->permission == 0) badRequestJson("no auth", 401);
 
     $file_count = $_POST['file_count'] ?? 0;
     if ($file_count < 1 || $file_count > MAX_ATTACHMENT_FILES) badRequestJson("wrong file_count", 400);
