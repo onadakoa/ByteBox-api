@@ -68,6 +68,10 @@ class Order
         return true;
     }
 
+    public function fetch_payment(mysqli $db): Payment|false {
+        return Payment::fetch_by_order($db, $this->order_id);
+    }
+
     public function delete(mysqli $db): bool {
         return $db->query("delete from `order` where order_id={$this->order_id}");
     }
@@ -131,21 +135,21 @@ class Order
         return $out;
     }
 
-    public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id): Order|false {
+    public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id): Order|false {
         $address = ShippingAddress::fetch_by_id($db, $shipping_address_id);
         if (!$address) return false;
-        $stmt = $db->prepare("insert into `order` (user_id, first_name, last_name, phone_number, city, postal_code, building_number, apartment_number) value (?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("isssssss", $user_id, $address->first_name, $address->last_name, $address->phone_number, $address->city, $address->postal_code, $address->building_number, $address->apartment_number);
+        $stmt = $db->prepare("insert into `order` (user_id, provider_id, first_name, last_name, phone_number, city, postal_code, building_number, apartment_number) value (?,?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("iisssssss", $user_id, $provider_id, $address->first_name, $address->last_name, $address->phone_number, $address->city, $address->postal_code, $address->building_number, $address->apartment_number);
         $res = $stmt->execute();
         if (!$res) return false;
         return Order::fetch_by_id($db, $db->insert_id);
     }
 
-    public static function insert_from_cart(mysqli $db, int $user_id, $shipping_address_id, bool $delete_cart = true): Order|false {
+    public static function insert_from_cart(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id, bool $delete_cart = true): Order|false {
         $cart_items = CartItem::fetch_by_user_id($db, $user_id);
         if (!$cart_items) return false;
 
-        $nOrder = Order::insert_new($db, $user_id, $shipping_address_id);
+        $nOrder = Order::insert_new($db, $user_id, $shipping_address_id, $provider_id);
         if (!$nOrder) return false;
 
         foreach ($cart_items as $item) {
@@ -155,8 +159,11 @@ class Order
             if ($delete_cart)
                 $item->delete($db);
         }
-
         $nOrder->refresh($db);
+
+        $payment = Payment::insert_new($db, $provider_id, $nOrder->order_id);
+        if (!$payment) return false;
+
         return $nOrder;
     }
 

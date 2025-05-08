@@ -1,13 +1,16 @@
 <?php
 require_once "../autoload.php";
 
-function POST() { // {shipping_address_id}
+function POST() { // {shipping_address_id, provider_id}
     session_start();
     useJson();
     $token = useToken();
 
     if (!isset($_POST['shipping_address_id']) || !is_numeric($_POST['shipping_address_id'])) badRequestJson("bad shipping_address_id", 400);
     $shipping_address_id = $_POST['shipping_address_id'];
+
+    if (!isset($_POST['provider_id']) || !is_numeric($_POST['provider_id'])) badRequestJson("bad provider_id", 400);
+    $provider_id = $_POST['provider_id'];
 
     $db = get_mysqli();
 
@@ -19,7 +22,7 @@ function POST() { // {shipping_address_id}
 
     if ($user->user_id != $address->user_id) badRequestJson("bad auth", 400);
 
-    $order = Order::insert_from_cart($db, $user->user_id, $shipping_address_id);
+    $order = Order::insert_from_cart($db, $user->user_id, $shipping_address_id, $provider_id);
 
     echo new Packet(ResponseCode::SUCCESS, $order);
 }
