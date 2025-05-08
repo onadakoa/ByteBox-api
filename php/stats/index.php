@@ -1,5 +1,6 @@
 <?php
 require_once "../autoload.php";
+useJson();
 
 $db = get_mysqli();
 
