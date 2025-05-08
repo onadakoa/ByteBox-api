@@ -22,7 +22,7 @@ class Order
 {
     public int $order_id;
     public int $user_id;
-    public int|null $payment_method_id;
+    public int|null $provider_id;
     public int $created_at;
     public string $status;
 

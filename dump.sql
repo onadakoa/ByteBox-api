@@ -113,7 +113,7 @@ DROP TABLE IF EXISTS `order`;
 CREATE TABLE `order` (
   `order_id` int unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int unsigned NOT NULL,
-  `payment_method_id` int unsigned DEFAULT NULL,
+  `provider_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('pending','paid','shipping','delivered','canceled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -126,9 +126,9 @@ CREATE TABLE `order` (
   `apartment_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`order_id`),
   KEY `user_id` (`user_id`),
-  KEY `payment_method_id` (`payment_method_id`),
+  KEY `payment_method_id` (`provider_id`),
   CONSTRAINT `order_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `payment_method_id` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_method` (`payment_method_id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `payment_method_id` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -154,16 +154,22 @@ CREATE TABLE `order_item` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `payment_method`
+-- Table structure for table `payment`
 --
 
-DROP TABLE IF EXISTS `payment_method`;
+DROP TABLE IF EXISTS `payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `payment_method` (
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payment_method_id` int unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`payment_method_id`)
+CREATE TABLE `payment` (
+  `payment_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `provider_id` int unsigned DEFAULT NULL,
+  `order_id` int unsigned NOT NULL,
+  `code` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`payment_id`),
+  KEY `provider_id` (`provider_id`),
+  KEY `order_id` (`order_id`),
+  CONSTRAINT `order_id` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `provider_id` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -190,6 +196,20 @@ CREATE TABLE `product` (
   CONSTRAINT `author` FOREIGN KEY (`author_id`) REFERENCES `user` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `product_ibfk_1` FOREIGN KEY (`attachment_id`) REFERENCES `attachment` (`attachment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `product_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `provider`
+--
+
+DROP TABLE IF EXISTS `provider`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `provider` (
+  `provider_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`provider_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
