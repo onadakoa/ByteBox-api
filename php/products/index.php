@@ -67,8 +67,7 @@ function PUT() {
     useJson();
     $required = ["name", "description", "price", "stock", "category_id", "id"];
     $obj = [];
-    $body = [];
-    parse_str(file_get_contents("php://input"), $body);
+    $body = useJsonData();
     foreach ($required as $field) {
         if (!isset($body[$field])) badRequestJson("missing field $field", 400);
         $obj[$field] = $body[$field];

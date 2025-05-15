@@ -32,11 +32,11 @@ function GET() {
     $db->close();
 }
 
-function POST() { // {id, login, password, first_name, last_name, permission}
+function PUT() { // {id, login, password, first_name, last_name, permission}
     session_start();
     useJson();
     $token = useToken();
-    $body = $_POST;
+    $body = useJsonData();
 
     $db = get_mysqli();
     $author = User::user_by_token($db, $token);

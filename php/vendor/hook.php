@@ -15,8 +15,6 @@ function useToken(bool $strict = true) {
     return $token;
 }
 
-function useFormData(): array {
-    $out = [];
-    parse_str(file_get_contents("php://input"), $out);
-    return $out;
+function useJsonData(): array {
+    return (array) json_decode(file_get_contents("php://input"));
 }

@@ -93,7 +93,7 @@ function PUT() {
     useJson();
     $token = useToken();
 
-    $body = useFormData();
+    $body = useJsonData();
 
     $required = [
         "id",

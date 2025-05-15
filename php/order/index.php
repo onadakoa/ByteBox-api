@@ -37,7 +37,7 @@ function PUT() { // {id, status}
     session_start();
     useJson();
     $token = useToken();
-    $body = useFormData();
+    $body = useJsonData();
 
     if (!isset($body['id']) || !is_numeric($body['id'])) badRequestJson("bad id", 400);
     $id = $body['id'];
