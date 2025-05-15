@@ -32,17 +32,20 @@ function GET() {
     $db->close();
 }
 
-function PUT() { // {id, login, password, first_name, last_name, permission}
+function POST() { // {id, login, password, first_name, last_name, permission}
     session_start();
     useJson();
     $token = useToken();
-    $body = useFormData();
+    $body = $_POST;
 
     $db = get_mysqli();
     $author = User::user_by_token($db, $token);
-    if (!$author) badRequestJson("invalid token", 400);
+    if (!$author) badRequestJson("invalid token", 401);
 
-    $id = $_GET['id'] ?? $author->user_id;
+    $id = -1;
+    if ($author->permission > 0) {
+        $id = $_GET['id'] ?? $author->user_id;
+    } else $id = $author->user_id;
     $target = User::user_by_id($db, $id);
     if (!$target) badRequestJson("not found");
 
