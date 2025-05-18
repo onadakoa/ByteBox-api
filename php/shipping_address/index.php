@@ -13,7 +13,7 @@ function GET() {
     if (!$user) badRequestJson("no auth", 401);
 
     $address = ShippingAddress::fetch_all($db, $user->user_id);
-    if (!$address) badRequestJson("not found");
+    if (!$address && !is_array($address)) badRequestJson("not found");
 
     echo new Packet(ResponseCode::SUCCESS, $address);
     $db->close();
