@@ -26,7 +26,7 @@ function GET() { // {id?, user_id?}
         echo new Packet(ResponseCode::SUCCESS, $orders);
     } else {
         $orders = Order::fetch_by_user_id($db, $author->user_id);
-        if (!$orders) badRequestJson("error", 500);
+        if (!$orders && !is_array($orders)) badRequestJson("error", 500);
         echo new Packet(ResponseCode::SUCCESS, $orders);
     }
 
