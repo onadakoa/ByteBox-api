@@ -16,6 +16,7 @@ class OrderItem
     public int $product_id;
     public int $quantity;
     public float $price;
+    public string $name;
 }
 
 class Order
@@ -45,6 +46,11 @@ class Order
     public function fill_items(mysqli $db): bool {
         $this->items = [];
         $res = $db->query("select * from order_item where order_id={$this->order_id}");
+        $res = $db->query("
+select *,
+       (select name from product p where p.product_id=oi.product_id) as name
+from order_item oi where oi.order_id={$this->order_id}
+        ");
         if (!$res) return false;
 
         while ($row = $res->fetch_object("OrderItem")) {
