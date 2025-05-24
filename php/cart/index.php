@@ -16,8 +16,12 @@ function GET() { // {product_id?}
 
     if ($id == -1) {
         $items = CartItem::fetch_by_user_id($db, $user->user_id);
+        $data = CartData::fetch($db, $user->user_id);
 
-        echo new Packet(ResponseCode::SUCCESS, $items);
+        echo new Packet(ResponseCode::SUCCESS, [
+            "items" => $items,
+            "data" => $data
+        ]);
     } else {
        $item = CartItem::fetch_by_product_id($db, $user->user_id, $id);
        if (!$item) badRequestJson("not found");
@@ -77,13 +81,12 @@ function PUT() { // {product_id, quantity}
     useJson();
     $token = useToken();
 
-    $body = [];
-    parse_str(file_get_contents("php://input"), $body);
+    $body = useJsonData();
 
     $required = ["product_id", "quantity"];
     foreach ($required as $field) {
         if (!isset($body[$field])) badRequestJson("$field not specified", 400);
-        if (!ctype_digit($body[$field])) badRequestJson("bad $field", 400);
+        if (!ctype_digit((string)$body[$field])) badRequestJson("bad $field", 400);
     }
 
     $db = get_mysqli();
