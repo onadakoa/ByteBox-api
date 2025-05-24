@@ -69,7 +69,7 @@ function POST() { // {product_id, quantity}
            echo new Packet(ResponseCode::SUCCESS, ['id' => -1]);
         } else {
             $item->update($db, $item->quantity+$body["quantity"]);
-            echo new Packet(ResponseCode::SUCCESS, ["id" => $item->cart_item_id]);
+            echo new Packet(ResponseCode::SUCCESS, ["id" => $item->cart_item_id, "quantity" => $item->quantity]);
         }
     }
 

@@ -19,9 +19,12 @@ class CartItem
         $this->quantity = $quantity;
     }
 
-    public function update(mysqli $db, $quantity) {
-       $query = "update cart_item set quantity=$quantity where cart_item_id={$this->cart_item_id}";
-       return $db->query($query);
+    public function update(mysqli $db, $nQuantity) {
+        $stmt = $db->prepare("update cart_item set quantity=? where cart_item_id=?");
+        $stmt->bind_param("ii", $nQuantity, $this->cart_item_id);
+        $res = $stmt->execute();
+        $this->quantity = $nQuantity;
+        return $res;
     }
 
     public function delete(mysqli $db) {
