@@ -11,6 +11,19 @@ class Provider
         return $res->fetch_object("Provider");
     }
 
+    /**
+     * @return Provider[]|false
+     */
+    public static function fetch_all(mysqli $db): array|false {
+        $res = $db->query("select * from provider");
+        if (!$res) return false;
+        $out = [];
+        while ($row = $res->fetch_object("Provider")) {
+            $out[] = $row;
+        }
+        return $out;
+    }
+
     public static function insert_new(mysqli $db, string $name): Provider|false {
         $stmt = $db->prepare("INSERT INTO provider (name) VALUES (?)");
         $stmt->bind_param("s", $name);
