@@ -52,7 +52,7 @@ function POST() {
         if ($size > MAX_SIZE) badRequestJson("file id=$id, size > MAX_SIZE", 400);
     }
 
-    $query = "insert into attachment (author_id, image_count) values (4, $file_count)";
+    $query = "insert into attachment (author_id, image_count) values ({$user->user_id}, $file_count)";
     $res = $db->query($query);
     if (!$res) badRequestJson("error", 500);
     $rowID = $db->insert_id;
@@ -64,7 +64,7 @@ function POST() {
         $res = $db->query($query);
         if (!$res) badRequestJson("error", 500);
         $out[] = [
-            "file_id" => ($f['id'] ?? -1),
+            "file_id" => ($f['file_id'] ?? -1),
             "id" => $db->insert_id
         ];
     }
