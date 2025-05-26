@@ -10,11 +10,14 @@ function GET() {
     $id = (int) ($_GET['id'] ?? -1);
     $search = ($_GET['search'] ?? "");
     $category = (int) ($_GET['category'] ?? -1);
+    $price_in = (int) ($_GET['price_in'] ?? 0);
+    $price_out = (int) ($_GET['price_out'] ?? 0);
+    $sort = ($_GET['sort'] ?? "P_ASC");
 
     $db = get_mysqli();
 
     if ($id==-1) {
-        $products = Product::fetch_all($db, $search, $limit, $offset, $category);
+        $products = Product::fetch_all($db, $search, $limit, $offset, $category, price_in: $price_in, price_out: $price_out, sort: $sort);
         if (!$products) badRequestJson("not found", 500);
         echo new Packet(ResponseCode::SUCCESS, $products);
     }

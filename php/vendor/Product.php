@@ -41,11 +41,25 @@ class Product
     /**
      * @return Product[]|false
      */
-    public static function fetch_all(mysqli $db, string $search = "", int $limit = 10, int $offset = 0, int $category_id = 0): array {
+    public static function fetch_all(mysqli $db, string $search = "", int $limit = 10, int $offset = 0, int $category_id = 0, int $price_in = 0, int $price_out = null, string $sort = "P_ASC"): array {
         $searchVal = "%{$search}%";
         $catQuery = "";
         if ($category_id > 0) $catQuery = "category_id=$category_id and";
-        $stmt = $db->prepare("select * from product where {$catQuery} (name like ? or product_id like ?) limit ? offset ?");
+        $priceQuery = "";
+        if ($price_in > 0) $priceQuery = "price>$price_in and ";
+        if ($price_out > $price_in) $priceQuery .= "price<$price_out and";
+
+        $sortQuery = "";
+        switch ($sort) {
+            case "P_ASC":
+                $sortQuery = "order by price asc";
+                break;
+            case "P_DESC":
+                $sortQuery = "order by price desc";
+                break;
+        }
+
+        $stmt = $db->prepare("select * from product where {$catQuery} {$priceQuery} (name like ? or product_id like ?) {$sortQuery} limit ? offset ?");
         $stmt->bind_param("ssii", $searchVal, $searchVal, $limit, $offset);
         $stmt->execute();
         $res = $stmt->get_result();
