@@ -41,9 +41,14 @@ class Product
     /**
      * @return Product[]|false
      */
-    public static function fetch_all(mysqli $db, int $limit = 10, int $offset = 0) {
-        $query = "select * from product limit $limit offset $offset";
-        $res = $db->query($query);
+    public static function fetch_all(mysqli $db, string $search = "", int $limit = 10, int $offset = 0, int $category_id = 0): array {
+        $searchVal = "%{$search}%";
+        $catQuery = "";
+        if ($category_id > 0) $catQuery = "category_id=$category_id and";
+        $stmt = $db->prepare("select * from product where {$catQuery} (name like ? or product_id like ?) limit ? offset ?");
+        $stmt->bind_param("ssii", $searchVal, $searchVal, $limit, $offset);
+        $stmt->execute();
+        $res = $stmt->get_result();
         if ($res->num_rows < 1) return false;
         $out = [];
         while ($row = $res->fetch_object("Product")) {

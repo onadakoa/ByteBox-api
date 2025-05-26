@@ -8,11 +8,13 @@ function GET() {
     $page = (int) ($_GET['page'] ?? 1);
     $offset = ($page - 1) * $limit;
     $id = (int) ($_GET['id'] ?? -1);
+    $search = ($_GET['search'] ?? "");
+    $category = (int) ($_GET['category'] ?? -1);
 
     $db = get_mysqli();
 
     if ($id==-1) {
-        $products = Product::fetch_all($db, $limit, $offset);
+        $products = Product::fetch_all($db, $search, $limit, $offset, $category);
         if (!$products) badRequestJson("not found", 500);
         echo new Packet(ResponseCode::SUCCESS, $products);
     }
