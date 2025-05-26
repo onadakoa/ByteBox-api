@@ -25,10 +25,12 @@ function GET() {
     $db->close();
 }
 
-function POST() { // {name, description, attachment_id?, author_id, price, stock, category_id}
+function POST() { // {name, description, attachment_id?, price, stock, category_id}
     session_start();
     useJson();
-    $required = ["name", "description", "author_id", "price", "stock", "category_id"];
+    $token = useToken();
+
+    $required = ["name", "description", "price", "stock", "category_id"];
     $obj = [];
     foreach ($required as $field) {
         if (!isset($_POST[$field])) badRequestJson("missing field $field", 400);
@@ -38,15 +40,18 @@ function POST() { // {name, description, attachment_id?, author_id, price, stock
 
     $db = get_mysqli();
 
+    $user = User::user_by_token($db, $token);
+    if (!$user) badRequestJson("no auth", 401);
+
     $query = <<<sql
-    insert into product (name, description, attachment_id , author_id, price, stock, category_id)
+    insert into product (name, description, attachment_id, author_id, price, stock, category_id)
     value (?, ?, ?, ?, ?, ?, ?)
     sql;
 
     $stmt = $db->prepare($query);
 
     $stmt->bind_param("ssiidii",
-    $obj['name'], $obj['description'], $obj['attachment_id'], $obj['author_id'], $obj['price'], $obj['stock'], $obj['category_id']
+    $obj['name'], $obj['description'], $obj['attachment_id'], $user->user_id, $obj['price'], $obj['stock'], $obj['category_id']
     );
 
     try {
