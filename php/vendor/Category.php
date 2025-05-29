@@ -40,8 +40,8 @@ class Category
     /**
      * @return Category[]|false
      */
-    public static function fetch_all(mysqli $db) {
-        $res = $db->query("select * from category");
+    public static function fetch_all(mysqli $db, string $search = "") {
+        $res = $db->query("select * from category where name like '%{$search}%'");
         if (!$res) return false;
 
         $out = [];

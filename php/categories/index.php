@@ -7,11 +7,13 @@ function GET()
     if (isset($_GET["id"]) && !ctype_digit($_GET['id'])) badRequestJson("bad id");
     $id = $_GET["id"] ?? -1;
 
+    $search = $_GET["search"] ?? null;
+
     $db = get_mysqli();
 
     if ($id == -1) {
-        $cats = Category::fetch_all($db);
-        if (!$cats) badRequestJson("error", 500);
+        $cats = Category::fetch_all($db, search: $search??"");
+        if (!is_array($cats) && !$cats) badRequestJson("error", 500);
         echo new Packet(ResponseCode::SUCCESS, $cats);
         $db->close();
         return;
