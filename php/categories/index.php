@@ -26,8 +26,8 @@ function GET()
 
 function POST() { // {name}
     useJson();
-    if (!isset($_POST['name'])) badRequestJson("bad request", 400);
-    $name = $_POST['name'];
+    $name = $_POST['name'] ?? null;
+    if (!$name) badRequestJson("no name field", 400);
     $db = get_mysqli();
 
     try {
@@ -44,8 +44,7 @@ function POST() { // {name}
 
 function PUT() { // {name, id}
     useJson();
-    $body = [];
-    parse_str(file_get_contents("php://input"), $body);
+    $body = useJsonData();
 
     if (!isset($body['id']) || !isset($body['name'])) badRequestJson("bad request", 400);
     $id = $body['id'];

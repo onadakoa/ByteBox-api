@@ -36,8 +36,7 @@ function POST() { // {alias, category_id}
 
 function PUT() { // {alias, category_id}
     useJson();
-    $body = [];
-    parse_str(file_get_contents("php://input"), $body);
+    $body = useJsonData();
     $id = $body['id'] ?? -1;
     if ($id < 0) badRequestJson("bad id", 400);
 
