@@ -128,8 +128,8 @@ from order_item oi where oi.order_id={$this->order_id}
     /**
      * @return Order[]|false
      */
-    public static function fetch_all(mysqli $db, int $limit = 20, int $offset = 0): array|false {
-        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o limit {$limit} offset {$offset}");
+    public static function fetch_all(mysqli $db, int $limit = 20, int $offset = 0, string $search = ""): array|false {
+        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where created_at like '%{$search}%' or status like '%{$search}%' or order_id like '%{$search}%' limit {$limit} offset {$offset}");
         if (!$res) return false;
 
         $out = [];

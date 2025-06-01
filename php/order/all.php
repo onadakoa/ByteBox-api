@@ -11,11 +11,13 @@ function GET() { // {limit?, page?}
     if (!is_numeric($limit) || !is_numeric($page)) badRequestJson("bad request", 400);
     $offset = ($page - 1) * $limit;
 
+    $search = $_GET['search'] ?? "";
+
     $db = get_mysqli();
     $user = User::user_by_token($db, $token);
     if (!$user || $user->permission==0) badRequestJson("no auth", 401);
 
-    $orders = Order::fetch_all($db, $limit, $offset);
+    $orders = Order::fetch_all($db, $limit, $offset, $search);
     if (!$orders) badRequestJson("error" ,500);
 
     echo new Packet(ResponseCode::SUCCESS, $orders);
