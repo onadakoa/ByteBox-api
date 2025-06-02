@@ -1,6 +1,6 @@
 <?php
 
-enum OrderStatus : string
+enum OrderStatus: string
 {
     case pending = "pending";
     case paid = "paid";
@@ -43,7 +43,8 @@ class Order
      */
     public array $items = [];
 
-    public function fill_items(mysqli $db): bool {
+    public function fill_items(mysqli $db): bool
+    {
         $this->items = [];
         $res = $db->query("select * from order_item where order_id={$this->order_id}");
         $res = $db->query("
@@ -59,7 +60,8 @@ from order_item oi where oi.order_id={$this->order_id}
         return true;
     }
 
-    public function refresh(mysqli $db): bool {
+    public function refresh(mysqli $db): bool
+    {
         $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$this->order_id}");
         if (!$res) return false;
         $row = $res->fetch_assoc();
@@ -74,19 +76,23 @@ from order_item oi where oi.order_id={$this->order_id}
         return true;
     }
 
-    public function fetch_payment(mysqli $db): Payment|false {
+    public function fetch_payment(mysqli $db): Payment|false
+    {
         return Payment::fetch_by_order($db, $this->order_id);
     }
 
-    public function delete(mysqli $db): bool {
+    public function delete(mysqli $db): bool
+    {
         return $db->query("delete from `order` where order_id={$this->order_id}");
     }
 
-    public function update_status(mysqli $db, OrderStatus $status): bool {
+    public function update_status(mysqli $db, OrderStatus $status): bool
+    {
         return $db->query("update `order` set status='{$status->value}' where order_id={$this->order_id}");
     }
 
-    public function append_item(mysqli $db, int $product_id, float $price, int $quantity): bool {
+    public function append_item(mysqli $db, int $product_id, float $price, int $quantity): bool
+    {
         $res = $db->query("insert into order_item (order_id, product_id, price, quantity) value ({$this->order_id}, {$product_id}, {$price}, {$quantity})");
         return $res;
     }
@@ -94,11 +100,12 @@ from order_item oi where oi.order_id={$this->order_id}
     /**
      * @return Order[]|false
      */
-    public static function fetch_by_user_id(mysqli $db, int $user_id): array|false {
+    public static function fetch_by_user_id(mysqli $db, int $user_id): array|false
+    {
         $user = User::user_by_id($db, $user_id);
         if (!$user) return false;
 
-        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where user_id={$user_id}");
+        $res = $db->query("select *, (select SUM(price)*quantity from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where user_id={$user_id}");
         if (!$res) return false;
 
         $out = [];
@@ -113,8 +120,9 @@ from order_item oi where oi.order_id={$this->order_id}
     /**
      * @return Order|false
      */
-    public static function fetch_by_id(mysqli $db, int $id): Order|false {
-        $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$id}");
+    public static function fetch_by_id(mysqli $db, int $id): Order|false
+    {
+        $res = $db->query("select *, (select SUM(price)*quantity from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$id}");
         if (!$res) return false;
 
         $row = $res->fetch_object("Order");
@@ -128,7 +136,8 @@ from order_item oi where oi.order_id={$this->order_id}
     /**
      * @return Order[]|false
      */
-    public static function fetch_all(mysqli $db, int $limit = 20, int $offset = 0, string $search = ""): array|false {
+    public static function fetch_all(mysqli $db, int $limit = 20, int $offset = 0, string $search = ""): array|false
+    {
         $res = $db->query("select *, (select SUM(price) from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where created_at like '%{$search}%' or status like '%{$search}%' or order_id like '%{$search}%' limit {$limit} offset {$offset}");
         if (!$res) return false;
 
@@ -141,7 +150,8 @@ from order_item oi where oi.order_id={$this->order_id}
         return $out;
     }
 
-    public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id): Order|false {
+    public static function insert_new(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id): Order|false
+    {
         $address = ShippingAddress::fetch_by_id($db, $shipping_address_id);
         if (!$address) return false;
         $stmt = $db->prepare("insert into `order` (user_id, provider_id, first_name, last_name, phone_number, city, postal_code, building_number, apartment_number) value (?,?,?,?,?,?,?,?,?)");
@@ -151,7 +161,8 @@ from order_item oi where oi.order_id={$this->order_id}
         return Order::fetch_by_id($db, $db->insert_id);
     }
 
-    public static function insert_from_cart(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id, bool $delete_cart = true): Order|false {
+    public static function insert_from_cart(mysqli $db, int $user_id, int $shipping_address_id, int $provider_id, bool $delete_cart = true): Order|false
+    {
         $cart_items = CartItem::fetch_by_user_id($db, $user_id);
         if (!$cart_items) return false;
 
@@ -172,5 +183,4 @@ from order_item oi where oi.order_id={$this->order_id}
 
         return $nOrder;
     }
-
 }
