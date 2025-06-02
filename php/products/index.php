@@ -1,7 +1,8 @@
 <?php
 require_once "../autoload.php";
 
-function GET() {
+function GET()
+{
     useJson();
 
     $limit = (int) ($_GET['limit'] ?? 10);
@@ -16,12 +17,11 @@ function GET() {
 
     $db = get_mysqli();
 
-    if ($id==-1) {
+    if ($id == -1) {
         $products = Product::fetch_all($db, $search, $limit, $offset, $category, price_in: $price_in, price_out: $price_out, sort: $sort);
         if (!$products) badRequestJson("not found", 500);
         echo new Packet(ResponseCode::SUCCESS, $products);
-    }
-    else {
+    } else {
         $product = Product::fetch_by_id($db, $id);
         if (!$product) badRequestJson("not found", 404);
         echo new Packet(ResponseCode::SUCCESS, $product);
@@ -30,7 +30,8 @@ function GET() {
     $db->close();
 }
 
-function POST() { // {name, description, attachment_id?, price, stock, category_id}
+function POST()
+{ // {name, description, attachment_id?, price, stock, category_id}
     session_start();
     useJson();
     $token = useToken();
@@ -50,13 +51,19 @@ function POST() { // {name, description, attachment_id?, price, stock, category_
 
     $query = <<<sql
     insert into product (name, description, attachment_id, author_id, price, stock, category_id)
-    value (?, ?, ?, ?, ?, ?, ?)
+    value (?, ?, {$obj['attachment_id']}, ?, ?, ?, ?)
     sql;
 
     $stmt = $db->prepare($query);
 
-    $stmt->bind_param("ssiidii",
-    $obj['name'], $obj['description'], $obj['attachment_id'], $user->user_id, $obj['price'], $obj['stock'], $obj['category_id']
+    $stmt->bind_param(
+        "ssidii",
+        $obj['name'],
+        $obj['description'],
+        $user->user_id,
+        $obj['price'],
+        $obj['stock'],
+        $obj['category_id']
     );
 
     try {
@@ -72,7 +79,8 @@ function POST() { // {name, description, attachment_id?, price, stock, category_
     $db->close();
 }
 
-function PUT() {
+function PUT()
+{
     session_start();
     useJson();
     $required = ["name", "description", "price", "stock", "category_id", "id"];
@@ -99,7 +107,8 @@ function PUT() {
     $db->close();
 }
 
-function DELETE() {
+function DELETE()
+{
     session_start();
     useJson();
     if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) badRequestJson("id incorrect", 400);
