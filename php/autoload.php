@@ -16,7 +16,7 @@ require_once "vendor/settings.php";
 require_once "vendor/hook.php";
 
 function get_mysqli(): mysqli {
-    return new mysqli("mysql", "root", "", "bytebox");
+    return new mysqli(HOSTNAME, "root", "", "bytebox");
 }
 
 enum RequestMethod: int
