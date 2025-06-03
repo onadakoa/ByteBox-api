@@ -2,7 +2,7 @@
 require_once "autoload.php";
 session_start();
 use_request_method(RequestMethod::GET->value | RequestMethod::POST->value);
-$db = new mysqli("mysql", "root", "", "bytebox");
+$db = get_mysqli();
 $out = array();
 
 if (isset($_SESSION['TOKEN'])) {
