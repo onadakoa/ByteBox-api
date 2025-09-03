@@ -90,9 +90,13 @@ function PUT()
         if (!isset($body[$field])) badRequestJson("missing field $field", 400);
         $obj[$field] = $body[$field];
     }
-    $obj['attachment_id'] = $body['attachment_id'] ?? null;
 
     $db = get_mysqli();
+
+    $product = Product::fetch_by_id($db, $obj['id']);
+    if (!$product) badRequestJson("product not found", 404);
+
+    $obj['attachment_id'] = $body['attachment_id'] ?? $product->attachment_id;
 
     try {
         $stmt = $db->prepare("update product set name=?, description=?, price=?, stock=?, category_id=?, attachment_id=? where product_id=?");
