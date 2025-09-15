@@ -105,7 +105,7 @@ from order_item oi where oi.order_id={$this->order_id}
         $user = User::user_by_id($db, $user_id);
         if (!$user) return false;
 
-        $res = $db->query("select *, (select SUM(price)*quantity from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where user_id={$user_id}");
+        $res = $db->query("select o.*, unix_timestamp(o.created_at) as created_at, sum(oi.price*oi.quantity) as total_price from `order` o left join `order_item` oi using(order_id) where user_id={$user_id} GROUP BY order_id");
         if (!$res) return false;
 
         $out = [];
@@ -122,7 +122,7 @@ from order_item oi where oi.order_id={$this->order_id}
      */
     public static function fetch_by_id(mysqli $db, int $id): Order|false
     {
-        $res = $db->query("select *, (select SUM(price)*quantity from order_item where order_id=o.order_id) as total_price, unix_timestamp(created_at) as created_at from `order` o where order_id={$id}");
+        $res = $db->query("select o.*, unix_timestamp(o.created_at) as created_at, sum(oi.price*oi.quantity) as total_price from `order` o left join `order_item` oi using(order_id) where order_id={$id} GROUP BY order_id");
         if (!$res) return false;
 
         $row = $res->fetch_object("Order");
@@ -157,7 +157,6 @@ from order_item oi where oi.order_id={$this->order_id}
         $stmt = $db->prepare("insert into `order` (user_id, provider_id, first_name, last_name, phone_number, city, postal_code, building_number, apartment_number) value (?,?,?,?,?,?,?,?,?)");
         $stmt->bind_param("iisssssss", $user_id, $provider_id, $address->first_name, $address->last_name, $address->phone_number, $address->city, $address->postal_code, $address->building_number, $address->apartment_number);
         $res = $stmt->execute();
-        if (!$res) return false;
         return Order::fetch_by_id($db, $db->insert_id);
     }
 
